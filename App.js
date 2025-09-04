@@ -1,31 +1,81 @@
 import { StatusBar } from 'expo-status-bar';
-import { Alert, Button, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Button, 
+  StyleSheet, 
+  Text, 
+  TextInput, 
+  View }
+  from 'react-native';
 import {useState} from 'react';
 
 export default function App() {
   const [data, setData] = useState([])
+  const [loading, setLoading] = useState(false);
+
+  const [username, setUsername] = useState("Usuario ");
+  const [email, setEmail] = useState("usuario@mail.com");
 
   const fetchData = async () => {
-    let URL = 'http://192.168.100.164:3000/api';
+    let URL = 'http://192.168.100.109:3000/api';
     setLoading(true)
     try {
-      const page = await fetch(`${URL}/user`);
+      const response = await fetch(`${URL}/user`);
       if (!response.ok){
         throw new Error(`Erro de servidor: ${response.status}`);
       }
-      const json = await page.json();
+      const result = await response.json();
       setData(result);
     } catch (error) {
-      console.log(error)
-      Alert.alert(error.message)
+      console.log(error);
+      Alert.alert(error.message);
     } finally{
+      setLoading(false);
+    }
+  };
+
+  const postData = async () => {
+    let URL = "http://192.168.100.109:3000/api";
+    setLoading(true);
+    try {
+      const body = {
+        username: username,
+        email: email,
+      };
+      const header = {
+        method: 'POST',
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify(body)
+      }
+      const response = await fetch(`${URL}/user`, header)
+      if (response.status!=201) {
+        throw new Error('Erro ao inserir dados')
+      }
+      const result = await response.json();
+      Alert.alert("Usuario criado com codigo: "+ result.userId);
+    } catch (error) {
+      console.log(error);
+      alert.alert("Erro ao enviar os dados: "+ error.message);      
+    } finally {
       setLoading(false)
     }
+  };
+
+  const handleAdd = async () => {
+    //desenvolver esse botão
   }
 
   return (
     <View style={styles.container}>
       <Text>Projeto teste Coffe & Aroma</Text>
+      <View>
+        <TextInput value={username} onChangeText={setUsername} />
+        <TextInput value={email} onChangeText={setEmail} />
+        <Button title="Adicionar" onPress={postData} />
+      </View>
         <View>
           <Text>Dados do banco</Text>
           {
@@ -33,7 +83,15 @@ export default function App() {
               return<Text>{item.username}</Text>
             })
           }
-          <Button title='buscar dados' onPress={fetchData}/>
+          {loading ? (
+            <ActivityIndicator />
+          ):(
+            <>
+             <Button title="buscar dados" onPress={fetchData} />
+             <Button title="limpar Dados" onPress={() => setData([])} />
+            </>
+          )}
+          
         </View>
       
       <StatusBar style="auto" />
