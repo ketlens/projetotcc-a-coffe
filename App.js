@@ -9,6 +9,8 @@ import {
   View }
   from 'react-native';
 import {useState} from 'react';
+import excluir from "./assets/image.png"
+import { ScrollView } from 'react-native/types_generated/index';
 
 export default function App() {
   const [data, setData] = useState([])
@@ -78,11 +80,19 @@ export default function App() {
       </View>
         <View>
           <Text>Dados do banco</Text>
-          {
-            data && data.map(item => {
-              return<Text>{item.username}</Text>
-            })
-          }
+          <>
+            {
+              data && data.map((item) => {
+                return(
+                <View style={{flexDirection: "row", justifyContent:"space-between", alignItems:"center",}}>
+                   <ScrollView> 
+                      <Text key={item.id}>{item.username}</Text>
+                      <Image source={image.png} alt="Excluir" height={32} width={32} />
+                    </ScrollView>
+                </View>
+              );
+              })}
+          </>
           {loading ? (
             <ActivityIndicator />
           ):(
